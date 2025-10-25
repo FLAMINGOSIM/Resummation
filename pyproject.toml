@@ -1,0 +1,11 @@
+[build-system]
+requires = ["flit_core >=3.11,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "resummation"
+authors = [{name = "Marcel van Daalen", email = "daalen@strw.leidenuniv.nl"}]
+readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+dynamic = ["version", "description"]
