@@ -9,3 +9,6 @@ readme = "README.md"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 dynamic = ["version", "description"]
+
+[project.urls]
+Homepage = "https://github.com/FLAMINGOSIM/Resummation"
