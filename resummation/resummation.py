@@ -275,7 +275,7 @@ class Resummation:
     def extrapolate500cto200m(self,fret500c):
         """
         Extrapolate the retained mass fractions within R500c to those within 
-        R200m, using the relation in the left-hand side of Figure 10 of VD25.
+        R200m, using the relation in the left-hand side of Figure 11 of VD25.
 
         Parameters
         ----------
@@ -291,7 +291,7 @@ class Resummation:
             The extrapolated retained mass fractions within R200m.
 
         """
-        return 1.008/(1+np.exp(-15.514*(np.array(fret500c)-0.714))) # See left-hand side of Figure 10
+        return 1.008/(1+np.exp(-15.514*(np.array(fret500c)-0.714))) # See left-hand side of Figure 11
 
     def set_fret_from_fbc(self,m500c,fbc,region=None,extrapolate500cto200m=False):
         """
@@ -325,7 +325,7 @@ class Resummation:
         extrapolate500cto200m: bool, optional
             Whether corrected baryon fractions given for R500c should be 
             extrapolated to estimate retained mass fractions within R200m as 
-            well, according to the relation of the left-hand side of Figure 10 
+            well, according to the relation of the left-hand side of Figure 11 
             of VD25. If this parameter is set to True for regions other than 
             R500c it will be ignored.
 
@@ -382,7 +382,7 @@ class Resummation:
         extrapolate500cto200m: bool, optional
             Whether baryon fractions given for R500c should be extrapolated 
             to estimate retained mass fractions within R200m as well, 
-            according to the relation of the left-hand side of Figure 10 
+            according to the relation of the left-hand side of Figure 11 
             of VD25. If this parameter is set to True for regions other than 
             R500c it will be ignored.
 
@@ -431,7 +431,7 @@ class Resummation:
         extrapolate500cto200m: bool, optional
             Whether baryon fractions given for R500c should be extrapolated 
             to estimate retained mass fractions within R200m as well, 
-            according to the relation of the left-hand side of Figure 10 
+            according to the relation of the left-hand side of Figure 11 
             of VD25. If this parameter is set to True for regions other than 
             R500c it will be ignored.
 
