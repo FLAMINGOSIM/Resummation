@@ -1,7 +1,7 @@
 Resummation
 ===========
 
-A Python implementation of the resummation model, which can be used to compute matter power suppression signals from halo baryon fractions. This version of the resummation model is described in van Daalen et al. (2025, VD25).
+A Python implementation of the resummation model, which can be used to compute matter power suppression signals from halo baryon fractions. This version of the resummation model is described in van Daalen et al. (2025, VD25): https://ui.adsabs.harvard.edu/abs/2025arXiv250904552V/abstract
 
 Installation
 ------------
