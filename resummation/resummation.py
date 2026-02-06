@@ -10,14 +10,14 @@ class Resummation:
     Resummation model for computing suppression signals from baryon fractions.
 
     This version of the resummation model is described in van Daalen et al. 
-    (2025, VD25). Creating a new instance of Resummation initializes the model 
+    (2026, VD26). Creating a new instance of Resummation initializes the model 
     to a set of DMO power spectra. See docstring of __init__ for 
     initialization parameters.
 
     After intializing the model, baryon fractions (or retained mass fractions 
     directly) should be set before calling run_resummation(). Optionally, 
     stellar fractions and a collective retained mass fraction for the combined 
-    5xR500c regions can be set as well (see sections 2.2.3 and 3.6 of VD25, 
+    5xR500c regions can be set as well (see sections 2.2.3 and 3.6 of VD26, 
     respectively). The model does not need to be reinitialized in order to 
     provide predictions for new sets of baryon fractions: simply set new 
     baryon fractions on the existing object and call run_resummation() again.
@@ -275,7 +275,7 @@ class Resummation:
     def extrapolate500cto200m(self,fret500c):
         """
         Extrapolate the retained mass fractions within R500c to those within 
-        R200m, using the relation in the left-hand side of Figure 11 of VD25.
+        R200m, using the relation in the left-hand side of Figure 11 of VD26.
 
         Parameters
         ----------
@@ -326,7 +326,7 @@ class Resummation:
             Whether corrected baryon fractions given for R500c should be 
             extrapolated to estimate retained mass fractions within R200m as 
             well, according to the relation of the left-hand side of Figure 11 
-            of VD25. If this parameter is set to True for regions other than 
+            of VD26. If this parameter is set to True for regions other than 
             R500c it will be ignored.
 
         """
@@ -383,7 +383,7 @@ class Resummation:
             Whether baryon fractions given for R500c should be extrapolated 
             to estimate retained mass fractions within R200m as well, 
             according to the relation of the left-hand side of Figure 11 
-            of VD25. If this parameter is set to True for regions other than 
+            of VD26. If this parameter is set to True for regions other than 
             R500c it will be ignored.
 
         """
@@ -432,7 +432,7 @@ class Resummation:
             Whether baryon fractions given for R500c should be extrapolated 
             to estimate retained mass fractions within R200m as well, 
             according to the relation of the left-hand side of Figure 11 
-            of VD25. If this parameter is set to True for regions other than 
+            of VD26. If this parameter is set to True for regions other than 
             R500c it will be ignored.
 
         fret5x500_crit: float, optional
@@ -487,7 +487,7 @@ class Resummation:
         function a second time overwrites stellar fractions set in the 
         previous call, whether the region is the same or not. To disable the 
         use of stellar fractions after they were already set, call this 
-        again with fstar or region set to None. See section 2.2.3 of VD25 
+        again with fstar or region set to None. See section 2.2.3 of VD26 
         for more information on how stellar fractions are used in the model.
 
         Parameters
@@ -545,7 +545,7 @@ class Resummation:
         """
         Sets the collective retained mass fraction for the combination of all 
         5xR500c halo regions. Setting this value is completely optional, see 
-        section 3.6 of VD25. If this function is not called, or its parameter 
+        section 3.6 of VD26. If this function is not called, or its parameter 
         is set to None, the 5xR500c power spectra are not used and the non-
         halo contribution is determined from the largest region set in 
         initialization instead.
