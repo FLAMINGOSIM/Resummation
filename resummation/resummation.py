@@ -29,7 +29,7 @@ class Resummation:
     functions for more information.
     """
 
-    def __init__(self,cosmology="FIDUCIAL",z=0,regions=["200_mean","500_crit"],highresspectra=0):
+    def __init__(self,cosmology="FIDUCIAL",z=0,regions=["200_mean","500_crit"],highresspectra=0,fractionextrapolation=False):
         """
         Initialization of the resummation model. Here one sets the cosmology, 
         redshift, overdensity region(s) and DMO simulation to use.
@@ -61,6 +61,14 @@ class Resummation:
             Power spectra beyond L1_m9_DMO are only available for the FIDUCIAL 
             cosmology at z=0.
 
+        fractionextrapolation: bool, optional
+            Sets how to handle baryon fractions, stellar fractions and 
+            retained mass fractions outside the range set by the user.
+            Set to False (default) to assume the default values for mass bins 
+            in which no user-provided value is given, i.e. stellar fractions 
+            of zero and retained mass fractions of unity. Set to True to 
+            linearly extrapolate fractions based on the user-given values.
+
         """
         self.initialized=False
         self.basedir=os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
@@ -76,6 +84,7 @@ class Resummation:
         if isinstance(z,list) or isinstance(z,np.ndarray):
             raise TypeError("Redshift z must be a scalar.")
         self.redshift=z
+        self.fractionextrapolation=fractionextrapolation
         if np.isclose(self.redshift,0):
             self.snap="0077"
         elif np.isclose(self.redshift,0.5):
@@ -133,6 +142,7 @@ class Resummation:
                 self.m500c_cen=np.array([10.75,11.25,11.75,12.25,12.75,13.25,13.75,14.25,14.75])
             else:
                 self.m500c_cen=np.array([9.75,10.25,10.75,11.25,11.75,12.25,12.75,13.25,13.75,14.25,14.75])
+        self.m500c_edges=np.concatenate(([1.5*self.m500c_cen[0]-0.5*self.m500c_cen[1]],0.5*(self.m500c_cen[:-1]+self.m500c_cen[1:]),[1.5*self.m500c_cen[-1]-0.5*self.m500c_cen[-2]]))
         self.nbins=len(self.m500c_cen)
         self.__getmassfracs()
         self.__getpowerspectra()
@@ -166,7 +176,7 @@ class Resummation:
             return np.loadtxt(mffile,ndmin=1)
         else:
             if not noerror:
-                raise ValueError(f"No mass fractions are available for this combination of input parameters (region={region}).")
+                raise ValueError(f"No mass fractions are available for this combination of input parameters ({self.dmosim}, region={region}).")
             return np.array([np.nan])
 
     def __getpowerspectra(self):
@@ -243,6 +253,18 @@ class Resummation:
         for i in np.arange(len(self.regions)):
             self.fretparams.update({f"abc{self.regions[i]}": np.array([a0*(self.SOdelta[i]/100.0)**a1,b,(1+(self.SOdelta[i]/c0)**c1)**c2])})
 
+    def __interpolatefraction(self,m500c,frac,stellar=False):
+        if self.fractionextrapolation:
+            return np.interp(self.m500c_cen,m500c,frac)
+        else:
+            if not stellar:
+                result=np.ones_like(self.m500c_cen)
+            else:
+                result=np.zeros_like(self.m500c_cen)
+            fractioninbin=(np.histogram(m500c,bins=self.m500c_edges)[0]>0)
+            result[fractioninbin]=np.interp(self.m500c_cen[fractioninbin],m500c,frac)
+            return result
+
     def get_fret_from_fbc(self,fbc,region):
         """
         Transforms corrected baryon fractions to retained mass fractions.
@@ -276,6 +298,8 @@ class Resummation:
         """
         Extrapolate the retained mass fractions within R500c to those within 
         R200m, using the relation in the left-hand side of Figure 11 of VD26.
+        Use with caution, as this relation may not be as robust as the 
+        retained mass relations per region.
 
         Parameters
         ----------
@@ -327,7 +351,8 @@ class Resummation:
             extrapolated to estimate retained mass fractions within R200m as 
             well, according to the relation of the left-hand side of Figure 11 
             of VD26. If this parameter is set to True for regions other than 
-            R500c it will be ignored.
+            R500c it will be ignored. Use with caution, as this relation may
+            not be as robust as the retained mass relations per region.
 
         """
         if not self.initialized:
@@ -384,7 +409,8 @@ class Resummation:
             to estimate retained mass fractions within R200m as well, 
             according to the relation of the left-hand side of Figure 11 
             of VD26. If this parameter is set to True for regions other than 
-            R500c it will be ignored.
+            R500c it will be ignored. Use with caution, as this relation may
+            not be as robust as the retained mass relations per region.
 
         """
         if not self.initialized:
@@ -433,7 +459,8 @@ class Resummation:
             to estimate retained mass fractions within R200m as well, 
             according to the relation of the left-hand side of Figure 11 
             of VD26. If this parameter is set to True for regions other than 
-            R500c it will be ignored.
+            R500c it will be ignored. Use with caution, as this relation may
+            not be as robust as the retained mass relations per region.
 
         fret5x500_crit: float, optional
             The retained mass fraction within the combination of all 5xR500c 
@@ -454,11 +481,11 @@ class Resummation:
                 print(f"Warning: retained mass fractions given for region {region}, but this region was not set in initialization, and so the model will not use them.")
             if self.fret is None:
                 self.fret={}
-            self.fret.update({f"fret{region}": np.interp(self.m500c_cen,m500c,fret)})
+            self.fret.update({f"fret{region}": self.__interpolatefraction(m500c,fret)})
             if region=="500_crit" and extrapolate500cto200m:
                 if not "200_mean" in self.regions:
-                    raise RuntimeError("To use extrapolate500cto200m please make sure to set 200_mean as one of the regions in initialization.")
-                self.fret.update({"fret200_mean": np.interp(self.m500c_cen,m500c,self.extrapolate500cto200m(fret))})
+                    raise RuntimeError("To use extrapolate500cto200m please make sure to set both 500_crit and 200_mean as one of the regions in initialization.")
+                self.fret.update({"fret200_mean": self.__interpolatefraction(m500c,self.extrapolate500cto200m(fret))})
         else:
             if not isinstance(fret,dict):
                 raise TypeError("Retained mass fractions should be given in dictionary form, with region names as keys, or a region should be provided in the function call.")
@@ -467,11 +494,11 @@ class Resummation:
             for r in self.regions:
                 if not f"fret{r}" in fret:
                     raise KeyError(f"Retained mass fractions fret were given as a dictionary, but has no key 'fbc{r}'.")
-                self.fret.update({f"fret{r}": np.interp(self.m500c_cen,m500c,fret[f"fret{r}"])})
+                self.fret.update({f"fret{r}": self.__interpolatefraction(m500c,fret[f"fret{r}"])})
             if extrapolate500cto200m:
                 if not "500_crit" in self.regions or not "200_mean" in self.regions:
-                    raise RuntimeError("To use extrapolate500cto200m please make sure to set 200_mean as one of the regions in initialization.")
-                self.fret.update({"fret200_mean": np.interp(self.m500c_cen,m500c,self.extrapolate500cto200m(fret["fret500_crit"]))})
+                    raise RuntimeError("To use extrapolate500cto200m please make sure to set both 500_crit and 200_mean as one of the regions in initialization.")
+                self.fret.update({"fret200_mean": self.__interpolatefraction(m500c,self.extrapolate500cto200m(fret["fret500_crit"]))})
         if fret5x500_crit is not None:
             self.set_fret5x500_crit(fret5x500_crit)
 
@@ -538,7 +565,7 @@ class Resummation:
             raise ValueError("Stellar fractions must be given inside a region the model was initialized for.")
         if region!=self.regions[-1]:
             print(f"Warning: stellar fractions should ideally be set for the innermost region.")
-        self.fstar=np.interp(self.m500c_cen,m500c,fstar)
+        self.fstar=self.__interpolatefraction(m500c,fstar,stellar=True)
         self.stellarregion=region
 
     def set_fret5x500_crit(self,fret5x500_crit):
