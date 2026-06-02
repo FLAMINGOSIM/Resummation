@@ -9,6 +9,7 @@ The easiest way to install the package is to use pip:
 ```
 pip3 install resummation
 ```
+The Github version of the code includes examples (see folder "examples") and otherwise matches version 1.0.3 of the resummation PyPI package.
 
 Notes on usage
 --------------
