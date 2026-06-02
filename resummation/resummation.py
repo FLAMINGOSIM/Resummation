@@ -108,7 +108,7 @@ class Resummation:
                     self.SOdelta[i]=float(factor)
                     recognized=True
             elif "_mean" in self.regions[i]:
-                Ez=(self.cosm["Om"]-self.cosm["Onu"])*(1+self.cosm["Om"])**3+self.cosm["Onu"]*(1+self.redshift)**4+(1-self.cosm["Om"])
+                Ez=(self.cosm["Om"]-self.cosm["Onu"])*(1+self.redshift)**3+self.cosm["Onu"]*(1+self.redshift)**4+(1-self.cosm["Om"])
                 factor=self.regions[i].split("_mean",1)[0]
                 if factor.isdigit():
                     self.SOdelta[i]=float(factor)*self.cosm["Om"]*(1+self.redshift)**3/Ez
